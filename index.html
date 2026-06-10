@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARQUEIRO ROULETTE - SISTEMA PROFISSIONAL</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --dark-bg: #0A0A0A;
+            --panel-bg: #1A1A1A;
+            --border-color: #333;
+            --text-light: #F5F5F5;
+            --text-dim: #AAAAAA;
+            --red: #DC143C;
+            --green: #2E8B57;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(10,10,10,0.9), rgba(26,26,26,0.9));
+            border-radius: 10px;
+            border: 1px solid var(--gold);
+        }
+
+        .brand h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: var(--gold);
+        }
+
+        .brand h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+
+        .warning {
+            color: var(--red);
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--gold-dark);
+            padding-bottom: 8px;
+        }
+
+        .roulette-table {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .zero-row { display: flex; justify-content: center; margin-bottom: 10px; }
+        .number-btn.zero { width: 80px; height: 55px; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; cursor: pointer; }
+        .numbers-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
+        .number-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-weight: bold; background: #111; border: 1px solid #333; }
+        .number-btn.red { background: linear-gradient(135deg, var(--red), #B22222); }
+        .number-btn.black { background: linear-gradient(135deg, #333, #111); }
+        .number-btn:hover { border-color: var(--gold); transform: scale(1.02); }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .number-input { flex: 2; min-width: 150px; }
+        .number-input input { width: 100%; padding: 12px; background: #111; border: 1px solid #333; border-radius: 8px; color: white; font-size: 1.2rem; text-align: center; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; }
+        .btn-danger { background: var(--red); color: white; }
+
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #111;
+            border-radius: 10px;
+        }
+        
+        .history-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+        
+        .numbers-history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .number-chip {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .number-chip.zero { background: var(--green); }
+        .number-chip.red { background: var(--red); }
+        .number-chip.black { background: #333; }
+        .number-chip.latest { border: 3px solid var(--gold); box-shadow: 0 0 10px gold; transform: scale(1.05); }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; text-align: center; }
+        .stat-card { padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--gold); font-family: 'Cinzel', serif; }
+
+        .signal-card { 
+            border-left: 4px solid var(--gold); 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            background: rgba(26,26,26,0.8); 
+            border-radius: 0 8px 8px 0;
+        }
+        .signal-card.waiting { border-left-color: #FFA500; }
+        .signal-card.confirmed { border-left-color: #00FF00; background: linear-gradient(135deg, rgba(0,255,0,0.1), rgba(26,26,26,0.8)); animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,0,0.4); }
+            50% { box-shadow: 0 0 0 5px rgba(0,255,0,0); }
+        }
+        
+        .signal-header { display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+        .signal-title { font-weight: bold; color: var(--gold-light); font-size: 1rem; }
+        .signal-status { padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
+        .status-waiting { background: rgba(255,165,0,0.2); color: #FFA500; }
+        .status-confirmed { background: rgba(0,255,0,0.2); color: #00FF00; }
+        
+        .signal-detail { font-size: 0.8rem; color: var(--text-dim); margin: 5px 0; }
+        .signal-target { font-size: 0.9rem; color: var(--gold); margin: 8px 0; font-weight: bold; }
+        .signal-numbers { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
+        .tab { padding: 8px 20px; cursor: pointer; color: var(--text-dim); }
+        .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .strategy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .strategy-card {
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
+            border-left: 3px solid var(--gold);
+        }
+        .strategy-name {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; color: var(--text-dim); font-size: 0.8rem; }
+        
+        .initial-message {
+            background: rgba(212,175,55,0.1);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+        }
+        
+        .order-info {
+            font-size: 0.7rem;
+            color: #888;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .reset-btn {
+            background: var(--red);
+            padding: 12px 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainSystem">
+        <header class="main-header">
+            <div class="brand">
+                <h1>ARQUEIRO</h1>
+                <h2>ROULETTE</h2>
+            </div>
+            <div class="warning">⚠️ JOGUE COM RESPONSABILIDADE</div>
+        </header>
+
+        <div id="initialMessage" class="initial-message">
+            🔄 AGUARDANDO 5 NÚMEROS INICIAIS<br>
+            O sistema começará a analisar automaticamente após o 5º número
+        </div>
+
+        <div class="container">
+            <div>
+                <div class="panel">
+                    <div class="panel-title">🎯 ENTRADA DE NÚMEROS</div>
+                    
+                    <div class="roulette-table" id="numbersTable"></div>
+                    
+                    <div class="input-group">
+                        <div class="number-input">
+                            <input type="number" id="numberInput" min="0" max="36" placeholder="Digite o número">
+                        </div>
+                        <button class="btn btn-primary" id="addNumberBtn">➕ ADICIONAR</button>
+                        <button class="btn btn-danger reset-btn" id="resetBtn">🔄 REINICIAR</button>
+                    </div>
+                    
+                    <div class="history-container">
+                        <div class="history-label">📜 HISTÓRICO (ÚLTIMOS 12 NÚMEROS)</div>
+                        <div class="numbers-history" id="numbersHistory">
+                            <div style="color: #666; text-align: center; width: 100%;">Nenhum número</div>
+                        </div>
+                        <div class="order-info">← MAIS ANTIGO | MAIS RECENTE →</div>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <div class="stat-card"><div class="stat-value" id="totalNumbers">0</div><div>Total</div></div>
+                        <div class="stat-card"><div class="stat-value" id="activeSignals">0</div><div>Aguardando</div></div>
+                        <div class="stat-card"><div class="stat-value" id="greenCount">0</div><div>GREEN</div></div>
+                        <div class="stat-card"><div class="stat-value" id="redCount">0</div><div>RED</div></div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">⏳ SINAIS AGUARDANDO</div>
+                    <div id="waitingSignalsList">
+                        <div style="color: #666; text-align: center; padding: 20px;">Nenhum sinal aguardando</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="panel">
+                    <div class="panel-title">🚨 SINAIS CONFIRMADOS (APOSTE AGORA!)</div>
+                    <div id="confirmedSignalsList">
+                        <div style="color: #666; text-align: center; padding: 20px;">Nenhum sinal confirmado</div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">📋 ESTRATÉGIAS</div>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="strategies">ESTRATÉGIAS</div>
+                        <div class="tab" data-tab="wheel">RODA</div>
+                        <div class="tab" data-tab="terminals">TERMINAIS</div>
+                    </div>
+                    
+                    <div id="strategies-tab" class="tab-content active">
+                        <div class="strategy-list">
+                            <div class="strategy-card">
+                                <div class="strategy-name">🎯 ALVO VARIÁVEL</div>
+                            </div>
+                            <div class="strategy-card">
+                                <div class="strategy-name">🎯 ALVO CENTRAL</div>
+                            </div>
+                            <div class="strategy-card">
+                                <div class="strategy-name">🎯 ALVO ALTERNADO</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="wheel-tab" class="tab-content">
+                        <div style="background: #111; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; line-height: 1.5; text-align: center;">
+                            0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+                        </div>
+                    </div>
+                    
+                    <div id="terminals-tab" class="tab-content">
+                        <div style="display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; font-size: 0.7rem;">
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T0</strong><br>0,10,20,30</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T1</strong><br>1,11,21,31</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T2</strong><br>2,12,22,32</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T3</strong><br>3,13,23,33</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T4</strong><br>4,14,24,34</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T5</strong><br>5,15,25,35</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T6</strong><br>6,16,26,36</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T7</strong><br>7,17,27</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T8</strong><br>8,18,28</div>
+                            <div style="background:#111; padding: 6px; text-align: center; border-radius: 6px;"><strong>T9</strong><br>9,19,29</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">ARQUEIRO ROULETTE © 2025 | VARIÁVEL | CENTRAL | ALTERNADO</div>
+    </div>
+
+    <script>
+        // ========== SEQUÊNCIA DA RODA ==========
+        const wheelSequence = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        
+        const terminalNumbers = {
+            0: [0, 10, 20, 30],
+            1: [1, 11, 21, 31],
+            2: [2, 12, 22, 32],
+            3: [3, 13, 23, 33],
+            4: [4, 14, 24, 34],
+            5: [5, 15, 25, 35],
+            6: [6, 16, 26, 36],
+            7: [7, 17, 27],
+            8: [8, 18, 28],
+            9: [9, 19, 29]
+        };
+        
+        // VIZINHOS CORRETOS DOS TERMINAIS (1 vizinho de cada lado)
+        const terminalNeighbors = {
+            0: [1, 5, 8, 11, 14, 23, 26, 32],
+            1: [2, 4, 9, 14, 20, 30, 33, 36],
+            2: [0, 15, 18, 21, 25, 28, 29, 35],
+            3: [1, 8, 10, 16, 26, 27, 35, 36],
+            4: [5, 6, 16, 17, 19, 20, 21, 31],
+            5: [0, 2, 3, 10, 12, 17, 24, 32],
+            6: [0, 3, 11, 13, 24, 27, 33, 34],
+            7: [6, 13, 25, 28, 29, 34],
+            8: [7, 12, 23, 29, 30],
+            9: [4, 7, 15, 22, 28, 31]
+        };
+        
+        function getNeighbors(number) {
+            const idx = wheelSequence.indexOf(number);
+            if (idx === -1) return [];
+            const left = (idx - 1 + wheelSequence.length) % wheelSequence.length;
+            const right = (idx + 1) % wheelSequence.length;
+            return [wheelSequence[left], wheelSequence[right]];
+        }
+        
+        function getTerminalNeighbors(terminal) {
+            return terminalNeighbors[terminal] || [];
+        }
+        
+        let fullHistory = [];
+        let waitingSignals = [];
+        let activeBets = [];
+        let completedSignals = [];
+        
+        let stats = { totalNumbers: 0, signalsTriggered: 0, greenCount: 0, redCount: 0 };
+        
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        
+        // ========== GERAR APOSTA ==========
+        function gerarApostaTerminal(alvoTerminal, tipoSinal) {
+            const alvos = terminalNumbers[alvoTerminal];
+            if (tipoSinal === 'SECO') {
+                return { betNumbers: [...alvos], betSize: alvos.length };
+            } else {
+                let betNumbers = [...alvos];
+                alvos.forEach(num => {
+                    betNumbers.push(...getNeighbors(num));
+                });
+                betNumbers = [...new Set(betNumbers)];
+                return { betNumbers: betNumbers.sort((a,b)=>a-b), betSize: betNumbers.length };
+            }
+        }
+        
+        // ========== ANALISAR GATILHO DE TERMINAIS (VARIÁVEL E CENTRAL) ==========
+        function analisarGatilhoTerminais() {
+            if (fullHistory.length < 5) return null;
+            
+            const ultimo = fullHistory[fullHistory.length - 1];
+            const penultimo = fullHistory[fullHistory.length - 2];
+            
+            const termUltimo = ultimo % 10;
+            const termPenultimo = penultimo % 10;
+            const diff = termPenultimo - termUltimo;
+            
+            let tipo = null;
+            let alvoTerminal = null;
+            let descricao = '';
+            
+            // Diferença 1 = Variável
+            if (Math.abs(diff) === 1) {
+                if (diff === -1) {
+                    alvoTerminal = (termUltimo + 1) % 10;
+                    tipo = 'VARIÁVEL CRESCENTE';
+                    descricao = `Terminais: ${termPenultimo}→${termUltimo} (crescente), alvo T${alvoTerminal}`;
+                } else if (diff === 1) {
+                    alvoTerminal = (termUltimo - 1 + 10) % 10;
+                    tipo = 'VARIÁVEL DECRESCENTE';
+                    descricao = `Terminais: ${termPenultimo}→${termUltimo} (decrescente), alvo T${alvoTerminal}`;
+                }
+            } 
+            // Diferença 2 ou 4 = Central
+            else if (Math.abs(diff) === 2 || Math.abs(diff) === 4) {
+                const soma = termPenultimo + termUltimo;
+                if (soma % 2 === 0) {
+                    alvoTerminal = soma / 2;
+                    tipo = 'CENTRAL';
+                    descricao = `Terminais: ${termPenultimo}→${termUltimo} (diferença ${Math.abs(diff)}), alvo central T${alvoTerminal}`;
+                }
+            }
+            
+            if (!tipo || alvoTerminal === null) return null;
+            
+            // Busca confirmação nos 6 números anteriores ao penultimo
+            const inicioGatilho = fullHistory.length - 2;
+            const buscaNumeros = [];
+            
+            for (let i = inicioGatilho - 1; i >= Math.max(0, inicioGatilho - 6); i--) {
+                const pos = inicioGatilho - i;
+                buscaNumeros.push({ num: fullHistory[i], pos: pos });
+            }
+            
+            let encontrado = null;
+            let tipoSinal = null;
+            let rodadasEspera = null;
+            
+            const alvosTerminal = terminalNumbers[alvoTerminal];
+            const vizinhosTerminal = getTerminalNeighbors(alvoTerminal);
+            
+            for (let i = 0; i < buscaNumeros.length; i++) {
+                const item = buscaNumeros[i];
+                if (alvosTerminal.includes(item.num)) {
+                    encontrado = item;
+                    tipoSinal = 'SECO';
+                    rodadasEspera = item.pos;
+                    break;
+                } else if (vizinhosTerminal.includes(item.num)) {
+                    encontrado = item;
+                    tipoSinal = 'COM_1V';
+                    rodadasEspera = item.pos;
+                    break;
+                }
+            }
+            
+            if (!encontrado) return null;
+            
+            const aposta = gerarApostaTerminal(alvoTerminal, tipoSinal);
+            
+            return {
+                id: Date.now() + Math.random(),
+                tipo: tipo,
+                alvoTerminal: alvoTerminal,
+                tipoSinal: tipoSinal,
+                gatilho: `${penultimo}(${termPenultimo}) → ${ultimo}(${termUltimo})`,
+                targetDisplay: tipoSinal === 'SECO' ? `T${alvoTerminal} SECO (${aposta.betSize} números)` : `T${alvoTerminal} com 1V (${aposta.betSize} números)`,
+                betNumbers: aposta.betNumbers,
+                cancelNumbers: tipoSinal === 'SECO' ? [...alvosTerminal] : [...new Set([...aposta.betNumbers, ...vizinhosTerminal])],
+                rodadasEspera: rodadasEspera,
+                rodadasCumpridas: 0,
+                status: 'waiting',
+                confirmationPos: encontrado.pos,
+                descricao: descricao,
+                numeroConfirmacao: null,
+                jaIncrementouPrimeira: false
+            };
+        }
+        
+        // ========== ANALISAR GATILHO DE ALVO ALTERNADO (MESMA LÓGICA DOS OUTROS) ==========
+        function analisarGatilhoAlternado() {
+            if (fullHistory.length < 5) return null;
+            
+            const ultimo = fullHistory[fullHistory.length - 1];
+            const penultimo = fullHistory[fullHistory.length - 2];
+            
+            const termUltimo = ultimo % 10;
+            const termPenultimo = penultimo % 10;
+            
+            // Gatilho: MESMO TERMINAL e NÚMEROS DIFERENTES
+            if (termPenultimo === termUltimo && penultimo !== ultimo) {
+                const alvoTerminal = (termUltimo - 1 + 10) % 10; // Terminal abaixo
+                const tipo = 'ALTERNADO';
+                
+                // Busca confirmação nos 6 números anteriores ao penultimo
+                const inicioGatilho = fullHistory.length - 2;
+                const buscaNumeros = [];
+                
+                for (let i = inicioGatilho - 1; i >= Math.max(0, inicioGatilho - 6); i--) {
+                    const pos = inicioGatilho - i;
+                    buscaNumeros.push({ num: fullHistory[i], pos: pos });
+                }
+                
+                let encontrado = null;
+                let tipoSinal = null;
+                let rodadasEspera = null;
+                
+                const alvosTerminal = terminalNumbers[alvoTerminal];
+                const vizinhosTerminal = getTerminalNeighbors(alvoTerminal);
+                
+                // Procura por TERMINAL PURO ou VIZINHO (igual aos outros padrões)
+                for (let i = 0; i < buscaNumeros.length; i++) {
+                    const item = buscaNumeros[i];
+                    if (alvosTerminal.includes(item.num)) {
+                        encontrado = item;
+                        tipoSinal = 'SECO';
+                        rodadasEspera = item.pos;
+                        break;
+                    } else if (vizinhosTerminal.includes(item.num)) {
+                        encontrado = item;
+                        tipoSinal = 'COM_1V';
+                        rodadasEspera = item.pos;
+                        break;
+                    }
+                }
+                
+                if (!encontrado) return null;
+                
+                const aposta = gerarApostaTerminal(alvoTerminal, tipoSinal);
+                const descricao = `Terminais: ${termPenultimo}→${termUltimo} (alternado), alvo T${alvoTerminal}`;
+                
+                return {
+                    id: Date.now() + Math.random(),
+                    tipo: tipo,
+                    alvoTerminal: alvoTerminal,
+                    tipoSinal: tipoSinal,
+                    gatilho: `${penultimo}(${termPenultimo}) → ${ultimo}(${termUltimo})`,
+                    targetDisplay: tipoSinal === 'SECO' ? `T${alvoTerminal} SECO (${aposta.betSize} números)` : `T${alvoTerminal} com 1V (${aposta.betSize} números)`,
+                    betNumbers: aposta.betNumbers,
+                    cancelNumbers: tipoSinal === 'SECO' ? [...alvosTerminal] : [...new Set([...aposta.betNumbers, ...vizinhosTerminal])],
+                    rodadasEspera: rodadasEspera,
+                    rodadasCumpridas: 0,
+                    status: 'waiting',
+                    confirmationPos: encontrado.pos,
+                    descricao: descricao,
+                    numeroConfirmacao: null,
+                    jaIncrementouPrimeira: false
+                };
+            }
+            
+            return null;
+        }
+        
+        // ========== ATUALIZAR SINAIS EM ESPERA ==========
+        function atualizarSinaisEspera(novoNumero) {
+            // Cancelamentos
+            for (let i = 0; i < waitingSignals.length; i++) {
+                if (waitingSignals[i].cancelNumbers && waitingSignals[i].cancelNumbers.includes(novoNumero)) {
+                    waitingSignals.splice(i, 1);
+                    i--;
+                    continue;
+                }
+            }
+            
+            // Incrementa rodadas
+            for (let i = 0; i < waitingSignals.length; i++) {
+                if (!waitingSignals[i].jaIncrementouPrimeira) {
+                    waitingSignals[i].jaIncrementouPrimeira = true;
+                    continue;
+                }
+                
+                waitingSignals[i].rodadasCumpridas++;
+                
+                if (waitingSignals[i].rodadasCumpridas >= waitingSignals[i].rodadasEspera) {
+                    const confirmedSignal = waitingSignals[i];
+                    confirmedSignal.status = 'active';
+                    confirmedSignal.rodadasApostando = 0;
+                    confirmedSignal.numeroConfirmacao = novoNumero;
+                    activeBets.push(confirmedSignal);
+                    waitingSignals.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        
+        // ========== PROCESSAR APOSTAS ATIVAS (GREEN/RED) ==========
+        function processarApostasAtivas(novoNumero) {
+            for (let i = 0; i < activeBets.length; i++) {
+                const bet = activeBets[i];
+                
+                if (novoNumero === bet.numeroConfirmacao) continue;
+                
+                if (bet.betNumbers.includes(novoNumero)) {
+                    bet.result = 'GREEN';
+                    bet.winningNumber = novoNumero;
+                    bet.status = 'green';
+                    completedSignals.push(bet);
+                    activeBets.splice(i, 1);
+                    stats.greenCount++;
+                    i--;
+                } else {
+                    bet.rodadasApostando++;
+                    if (bet.rodadasApostando >= 3) {
+                        bet.result = 'RED';
+                        bet.status = 'red';
+                        completedSignals.push(bet);
+                        activeBets.splice(i, 1);
+                        stats.redCount++;
+                        i--;
+                    }
+                }
+            }
+        }
+        
+        // ========== ADICIONAR NÚMERO ==========
+        function adicionarNumero(numero) {
+            if (isNaN(numero) || numero < 0 || numero > 36) return alert('Número inválido (0-36)');
+            
+            fullHistory.push(numero);
+            stats.totalNumbers++;
+            
+            const msgDiv = document.getElementById('initialMessage');
+            if (fullHistory.length < 5) {
+                msgDiv.innerHTML = `🔄 AGUARDANDO ${5 - fullHistory.length} NÚMEROS INICIAIS<br>O sistema começará a analisar automaticamente após o 5º número`;
+                msgDiv.style.display = 'block';
+            } else {
+                msgDiv.style.display = 'none';
+            }
+            
+            if (fullHistory.length >= 5) {
+                // Alvo Variável / Central
+                const novoSinalTerminal = analisarGatilhoTerminais();
+                if (novoSinalTerminal) {
+                    waitingSignals.push(novoSinalTerminal);
+                    stats.signalsTriggered++;
+                }
+                
+                // Alvo Alternado
+                const novoSinalAlternado = analisarGatilhoAlternado();
+                if (novoSinalAlternado) {
+                    waitingSignals.push(novoSinalAlternado);
+                    stats.signalsTriggered++;
+                }
+            }
+            
+            atualizarSinaisEspera(numero);
+            processarApostasAtivas(numero);
+            
+            updateDisplay();
+            atualizarListas();
+            salvarDados();
+        }
+        
+        function addNumber() {
+            const input = document.getElementById('numberInput');
+            const num = parseInt(input.value);
+            if (isNaN(num) || num < 0 || num > 36) return alert('Digite um número entre 0 e 36');
+            adicionarNumero(num);
+            input.value = '';
+            input.focus();
+        }
+        
+        function resetarTudo() {
+            if (confirm('Reset completo? Todos os dados serão perdidos.')) {
+                fullHistory = [];
+                waitingSignals = [];
+                activeBets = [];
+                completedSignals = [];
+                stats = { totalNumbers: 0, signalsTriggered: 0, greenCount: 0, redCount: 0 };
+                localStorage.removeItem('arqueiroRouletteData');
+                
+                const msgDiv = document.getElementById('initialMessage');
+                msgDiv.innerHTML = `🔄 AGUARDANDO 5 NÚMEROS INICIAIS<br>O sistema começará a analisar automaticamente após o 5º número`;
+                msgDiv.style.display = 'block';
+                
+                updateDisplay();
+                atualizarListas();
+            }
+        }
+        
+        function criarTabelaNumeros() {
+            const container = document.getElementById('numbersTable');
+            container.innerHTML = '';
+            
+            const zeroDiv = document.createElement('div');
+            zeroDiv.className = 'zero-row';
+            const zeroBtn = document.createElement('div');
+            zeroBtn.className = 'number-btn zero';
+            zeroBtn.textContent = '0';
+            zeroBtn.onclick = () => adicionarNumero(0);
+            zeroDiv.appendChild(zeroBtn);
+            container.appendChild(zeroDiv);
+            
+            const linhas = [
+                [3,6,9,12,15,18,21,24,27,30,33,36],
+                [2,5,8,11,14,17,20,23,26,29,32,35],
+                [1,4,7,10,13,16,19,22,25,28,31,34]
+            ];
+            
+            linhas.forEach(linha => {
+                const row = document.createElement('div');
+                row.className = 'numbers-row';
+                linha.forEach(num => {
+                    const btn = document.createElement('div');
+                    btn.className = `number-btn ${redNumbers.includes(num) ? 'red' : 'black'}`;
+                    btn.textContent = num;
+                    btn.onclick = () => adicionarNumero(num);
+                    row.appendChild(btn);
+                });
+                container.appendChild(row);
+            });
+        }
+        
+        function updateDisplay() {
+            const historyDiv = document.getElementById('numbersHistory');
+            historyDiv.innerHTML = '';
+            
+            if (fullHistory.length === 0) {
+                historyDiv.innerHTML = '<div style="color:#666; text-align:center; width:100%;">Nenhum número</div>';
+                return;
+            }
+            
+            const ultimos12 = fullHistory.slice(-12);
+            ultimos12.forEach((num, idx) => {
+                const chip = document.createElement('div');
+                const isLatest = idx === ultimos12.length - 1;
+                chip.className = `number-chip ${num === 0 ? 'zero' : (redNumbers.includes(num) ? 'red' : 'black')} ${isLatest ? 'latest' : ''}`;
+                chip.textContent = num;
+                historyDiv.appendChild(chip);
+            });
+        }
+        
+        function atualizarListas() {
+            const waitingDiv = document.getElementById('waitingSignalsList');
+            const confirmedDiv = document.getElementById('confirmedSignalsList');
+            
+            if (waitingSignals.length === 0) {
+                waitingDiv.innerHTML = '<div style="color:#666; text-align:center; padding:20px;">Nenhum sinal aguardando</div>';
+            } else {
+                waitingDiv.innerHTML = '';
+                waitingSignals.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'signal-card waiting';
+                    card.innerHTML = `
+                        <div class="signal-header">
+                            <span class="signal-title">${s.tipo === 'ALTERNADO' ? 'ALTERNADO' : s.tipo}</span>
+                            <span class="signal-status status-waiting">AGUARDANDO ${s.rodadasCumpridas}/${s.rodadasEspera}</span>
+                        </div>
+                        <div class="signal-detail">Gatilho: ${s.gatilho}</div>
+                        <div class="signal-detail">📝 ${s.descricao}</div>
+                        <div class="signal-target">🎯 ${s.targetDisplay}</div>
+                        <div class="signal-detail">📊 Aposta: ${s.betNumbers.length} números</div>
+                        <div class="signal-detail">🔍 Confirmação: encontrado na ${s.confirmationPos}ª casa</div>
+                    `;
+                    waitingDiv.appendChild(card);
+                });
+            }
+            
+            if (activeBets.length === 0) {
+                confirmedDiv.innerHTML = '<div style="color:#666; text-align:center; padding:20px;">Nenhum sinal confirmado</div>';
+            } else {
+                confirmedDiv.innerHTML = '';
+                activeBets.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'signal-card confirmed';
+                    const rodadasRestantes = 3 - (s.rodadasApostando || 0);
+                    card.innerHTML = `
+                        <div class="signal-header">
+                            <span class="signal-title" style="color: #00FF00;">🚨 ${s.tipo === 'ALTERNADO' ? 'ALTERNADO' : s.tipo}</span>
+                            <span class="signal-status status-confirmed">CONFIRMADO - APOSTE!</span>
+                        </div>
+                        <div class="signal-detail">Gatilho: ${s.gatilho}</div>
+                        <div class="signal-detail">📝 ${s.descricao}</div>
+                        <div class="signal-target" style="font-size: 1rem;">🎯 APOSTAR: ${s.targetDisplay}</div>
+                        <div class="signal-detail">💰 ${s.betNumbers.length} números</div>
+                        <div class="signal-detail">⏳ Tentativas restantes: ${rodadasRestantes}/3</div>
+                        <div class="signal-numbers">
+                            ${s.betNumbers.slice(0, 20).map(n => {
+                                const bgColor = n === 0 ? '#2E8B57' : (redNumbers.includes(n) ? '#DC143C' : '#333');
+                                return `<span style="display: inline-block; width: 35px; height: 35px; border-radius: 50%; background: ${bgColor}; color: white; text-align: center; line-height: 35px; font-size: 11px; margin: 2px;">${n}</span>`;
+                            }).join('')}
+                            ${s.betNumbers.length > 20 ? `<span style="color: #888;">+${s.betNumbers.length - 20}</span>` : ''}
+                        </div>
+                    `;
+                    confirmedDiv.appendChild(card);
+                });
+            }
+            
+            document.getElementById('totalNumbers').textContent = stats.totalNumbers;
+            document.getElementById('activeSignals').textContent = waitingSignals.length;
+            document.getElementById('greenCount').textContent = stats.greenCount;
+            document.getElementById('redCount').textContent = stats.redCount;
+        }
+        
+        function salvarDados() {
+            localStorage.setItem('arqueiroRouletteData', JSON.stringify({ 
+                fullHistory, stats, waitingSignals, activeBets, completedSignals 
+            }));
+        }
+        
+        function carregarDados() {
+            const saved = localStorage.getItem('arqueiroRouletteData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    fullHistory = data.fullHistory || [];
+                    stats = data.stats || { totalNumbers: 0, signalsTriggered: 0, greenCount: 0, redCount: 0 };
+                    waitingSignals = data.waitingSignals || [];
+                    activeBets = data.activeBets || [];
+                    completedSignals = data.completedSignals || [];
+                    
+                    const msgDiv = document.getElementById('initialMessage');
+                    if (fullHistory.length < 5) {
+                        msgDiv.innerHTML = `🔄 AGUARDANDO ${5 - fullHistory.length} NÚMEROS INICIAIS<br>O sistema começará a analisar automaticamente após o 5º número`;
+                        msgDiv.style.display = 'block';
+                    } else {
+                        msgDiv.style.display = 'none';
+                    }
+                    
+                    updateDisplay();
+                    atualizarListas();
+                } catch(e) { console.error(e); }
+            }
+        }
+        
+        function inicializarSistema() {
+            criarTabelaNumeros();
+            carregarDados();
+            updateDisplay();
+            atualizarListas();
+            
+            document.getElementById('addNumberBtn').onclick = addNumber;
+            document.getElementById('resetBtn').onclick = resetarTudo;
+            document.getElementById('numberInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addNumber(); });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.onclick = function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+                };
+            });
+        }
+        
+        inicializarSistema();
+    </script>
+</body>
+</html>
