@@ -433,7 +433,6 @@
             let alvoTerminal = null;
             let descricao = '';
             
-            // Diferença 1 = Variável
             if (Math.abs(diff) === 1) {
                 if (diff === -1) {
                     alvoTerminal = (termUltimo + 1) % 10;
@@ -445,7 +444,6 @@
                     descricao = `Terminais: ${termPenultimo}→${termUltimo} (decrescente), alvo T${alvoTerminal}`;
                 }
             } 
-            // Diferença 2 ou 4 = Central
             else if (Math.abs(diff) === 2 || Math.abs(diff) === 4) {
                 const soma = termPenultimo + termUltimo;
                 if (soma % 2 === 0) {
@@ -457,7 +455,6 @@
             
             if (!tipo || alvoTerminal === null) return null;
             
-            // Busca confirmação nos 6 números anteriores ao penultimo
             const inicioGatilho = fullHistory.length - 2;
             const buscaNumeros = [];
             
@@ -623,39 +620,39 @@
             for (let i = 0; i < activeBets.length; i++) {
                 const bet = activeBets[i];
                 
+                // Número que confirmou o sinal NÃO conta como teste
                 if (novoNumero === bet.numeroConfirmacao) continue;
                 
-                if (bet.betNumbers.includes(novoNumero)) {
-                    // Sinal SECO: diferencia alvo de vizinho
+                // Verifica se acertou ALGO (alvo ou vizinho)
+                const acertouAlvo = bet.alvosTerminal && bet.alvosTerminal.includes(novoNumero);
+                const acertouVizinho = bet.vizinhosTerminal && bet.vizinhosTerminal.includes(novoNumero);
+                const acertou = acertouAlvo || acertouVizinho;
+                
+                if (acertou) {
                     if (bet.tipoSinal === 'SECO') {
-                        if (bet.alvosTerminal && bet.alvosTerminal.includes(novoNumero)) {
-                            // Acertou o ALVO direto
+                        if (acertouAlvo) {
                             bet.result = 'GREEN';
                             bet.status = 'green';
-                            completedSignals.push(bet);
-                            activeBets.splice(i, 1);
-                            stats.greenCount++;
-                            i--;
-                        } else if (bet.vizinhosTerminal && bet.vizinhosTerminal.includes(novoNumero)) {
-                            // Acertou um VIZINHO do alvo seco
+                        } else {
                             bet.result = 'PAGO';
                             bet.status = 'pago';
-                            completedSignals.push(bet);
-                            activeBets.splice(i, 1);
                             stats.pagoCount++;
-                            i--;
                         }
-                        // Se não for nem alvo nem vizinho (não deveria acontecer pois está em betNumbers)
                     } else {
-                        // Sinal COM 1V: qualquer acerto é GREEN
                         bet.result = 'GREEN';
-                        bet.winningNumber = novoNumero;
                         bet.status = 'green';
-                        completedSignals.push(bet);
-                        activeBets.splice(i, 1);
                         stats.greenCount++;
-                        i--;
                     }
+                    bet.winningNumber = novoNumero;
+                    completedSignals.push(bet);
+                    activeBets.splice(i, 1);
+                    if (bet.result !== 'PAGO' && bet.result !== 'GREEN') {
+                        // Se não foi PAGO nem GREEN, é GREEN para COM 1V
+                        if (bet.tipoSinal !== 'SECO') stats.greenCount++;
+                    } else if (bet.result === 'GREEN') {
+                        stats.greenCount++;
+                    }
+                    i--;
                 } else {
                     bet.rodadasApostando++;
                     if (bet.rodadasApostando >= 3) {
@@ -845,7 +842,7 @@
             document.getElementById('totalNumbers').textContent = stats.totalNumbers;
             document.getElementById('activeSignals').textContent = waitingSignals.length;
             document.getElementById('greenCount').textContent = stats.greenCount;
-            document.getElementById('pagoCount').textContent = stats.pagoCount || 0;
+            document.getElementById('pagoCount').textContent = stats.pagoCount;
             document.getElementById('redCount').textContent = stats.redCount;
         }
         
