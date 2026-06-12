@@ -626,15 +626,28 @@
                 if (novoNumero === bet.numeroConfirmacao) continue;
                 
                 if (bet.betNumbers.includes(novoNumero)) {
-                    // Verifica se é sinal SECO e acertou vizinho
-                    if (bet.tipoSinal === 'SECO' && bet.alvosTerminal && !bet.alvosTerminal.includes(novoNumero)) {
-                        bet.result = 'PAGO';
-                        bet.status = 'pago';
-                        completedSignals.push(bet);
-                        activeBets.splice(i, 1);
-                        stats.pagoCount++;
-                        i--;
+                    // Sinal SECO: diferencia alvo de vizinho
+                    if (bet.tipoSinal === 'SECO') {
+                        if (bet.alvosTerminal && bet.alvosTerminal.includes(novoNumero)) {
+                            // Acertou o ALVO direto
+                            bet.result = 'GREEN';
+                            bet.status = 'green';
+                            completedSignals.push(bet);
+                            activeBets.splice(i, 1);
+                            stats.greenCount++;
+                            i--;
+                        } else if (bet.vizinhosTerminal && bet.vizinhosTerminal.includes(novoNumero)) {
+                            // Acertou um VIZINHO do alvo seco
+                            bet.result = 'PAGO';
+                            bet.status = 'pago';
+                            completedSignals.push(bet);
+                            activeBets.splice(i, 1);
+                            stats.pagoCount++;
+                            i--;
+                        }
+                        // Se não for nem alvo nem vizinho (não deveria acontecer pois está em betNumbers)
                     } else {
+                        // Sinal COM 1V: qualquer acerto é GREEN
                         bet.result = 'GREEN';
                         bet.winningNumber = novoNumero;
                         bet.status = 'green';
