@@ -585,9 +585,25 @@
         
         // ========== ATUALIZAR SINAIS EM ESPERA ==========
         function atualizarSinaisEspera(novoNumero) {
-            // CANCELAMENTO: qualquer número da aposta cancela o sinal durante a espera
+            // Cancelamento durante a espera
             for (let i = 0; i < waitingSignals.length; i++) {
-                if (waitingSignals[i].betNumbers.includes(novoNumero)) {
+                const signal = waitingSignals[i];
+                let deveCancelar = false;
+                
+                if (signal.tipoSinal === 'SECO') {
+                    // SECO: cancela se sair ALVO ou VIZINHO
+                    if (signal.alvosTerminal?.includes(novoNumero) ||
+                        signal.vizinhosTerminal?.includes(novoNumero)) {
+                        deveCancelar = true;
+                    }
+                } else {
+                    // COM 1V: cancela se sair qualquer número da aposta
+                    if (signal.betNumbers.includes(novoNumero)) {
+                        deveCancelar = true;
+                    }
+                }
+                
+                if (deveCancelar) {
                     waitingSignals.splice(i, 1);
                     i--;
                     continue;
@@ -620,10 +636,8 @@
             for (let i = 0; i < activeBets.length; i++) {
                 const bet = activeBets[i];
                 
-                // Número que confirmou o sinal NÃO conta como teste
                 if (novoNumero === bet.numeroConfirmacao) continue;
                 
-                // Verifica se acertou ALGO (alvo ou vizinho)
                 const acertouAlvo = bet.alvosTerminal && bet.alvosTerminal.includes(novoNumero);
                 const acertouVizinho = bet.vizinhosTerminal && bet.vizinhosTerminal.includes(novoNumero);
                 const acertou = acertouAlvo || acertouVizinho;
@@ -633,6 +647,7 @@
                         if (acertouAlvo) {
                             bet.result = 'GREEN';
                             bet.status = 'green';
+                            stats.greenCount++;
                         } else {
                             bet.result = 'PAGO';
                             bet.status = 'pago';
@@ -646,12 +661,6 @@
                     bet.winningNumber = novoNumero;
                     completedSignals.push(bet);
                     activeBets.splice(i, 1);
-                    if (bet.result !== 'PAGO' && bet.result !== 'GREEN') {
-                        // Se não foi PAGO nem GREEN, é GREEN para COM 1V
-                        if (bet.tipoSinal !== 'SECO') stats.greenCount++;
-                    } else if (bet.result === 'GREEN') {
-                        stats.greenCount++;
-                    }
                     i--;
                 } else {
                     bet.rodadasApostando++;
